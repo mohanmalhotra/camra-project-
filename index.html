@@ -11,8 +11,24 @@
     </style>
 </head>
 <body>
-    <h1>Camera Feed Test</h1>
-    <video id="myVideo" autoplay playsinline width="400" height="300"></video>
+    <body>
+<!-- Do alag buttons taaki rasta saaf ho -->
+    <div style="margin-bottom: 20px;">
+        <button id="startCamBtn" style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+            📸 Phone (Start Camera)
+        </button>
+        <button id="startWatchBtn" style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            💻 Laptop (Watch Screen)
+        </button>
+    </div>
+
+    <!-- Video dikhane wala dabba -->
+    <div style="border: 3px solid #2ecc71; display: inline-block; border-radius: 10px; overflow: hidden; background: #000;">
+        <video id="myVideo" autoplay playsinline width="400" height="300"></video>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
+</body></script>
 </body>
 </html>
