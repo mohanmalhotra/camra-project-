@@ -7,11 +7,11 @@
 </head>
 <body style="background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px;">
 
-    <h2>🚀 Super CCTV Camera System</h2>
+    <h2>🚀 Super CCTV Camera System (Strict Front Cam)</h2>
     
     <div style="margin-bottom: 20px;">
         <button id="startCamBtn" style="padding: 12px 24px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">
-            📸 Phone (Start Camera)
+            📸 Phone (Start Front Camera)
         </button>
         <button id="startWatchBtn" style="padding: 12px 24px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
             💻 Laptop (Watch Screen)
@@ -27,28 +27,30 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     
     <script>
-        // Direct Render ke live URL se connect
         const socket = io("https://camra-project.onrender.com");
         
         const videoElement = document.getElementById('myVideo');
         const receiverImage = document.getElementById('receiverImg');
 
-        // Test connection logs
         socket.on('connect', () => {
-            console.log("Connected to Server! ID:", socket.id);
+            console.log("Connected to Server!");
         });
 
-        // 📲 PHONE WALA CODE
+        // 📲 PHONE WALA CODE (Strict Front Cam Force)
         document.getElementById('startCamBtn').addEventListener('click', async () => {
-            alert("Phone camera setting up... Permission allow kijiye!");
+            alert("Front camera force start ho raha hai...");
             try {
+                // Is baar browser ko forced bol rahe hain ki strictly Front Cam hi chahiye
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" }, 
+                    video: { 
+                        facingMode: { exact: "user" } 
+                    }, 
                     audio: false 
                 }); 
+                
                 videoElement.srcObject = stream;
                 videoElement.style.display = "block";
-                receiverImage.style.display = "none"; // Phone par image chupa do
+                receiverImage.style.display = "none";
                 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
@@ -63,20 +65,32 @@
                     }
                 }, 100);
 
-                alert("🟢 Phone Camera Live! Ab frames ja rahe hain.");
+                alert("🟢 Front Camera successfully locked and live!");
             } catch (err) {
-                alert("🔴 Camera Error: " + err.message);
+                console.log("Strict mode failed, trying fallback front mode...", err);
+                // Agar kuch phones me 'exact' mana kare, toh normal front cam handle karega
+                try {
+                    const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "user" }, 
+                        audio: false 
+                    });
+                    videoElement.srcObject = fallbackStream;
+                    videoElement.style.display = "block";
+                    receiverImage.style.display = "none";
+                    alert("🟢 Front Camera Live (Fallback Mode)!");
+                } catch(fallbackErr) {
+                    alert("🔴 Camera Error: " + fallbackErr.message);
+                }
             }
         });
 
         // 💻 LAPTOP WALA CODE
         document.getElementById('startWatchBtn').addEventListener('click', () => {
-            alert("🔵 Laptop Mode Active! Phone ka wait kijiye.");
+            alert("🔵 Laptop Mode Active!");
             videoElement.style.display = "none";
             receiverImage.style.display = "block";
         });
 
-        // Live frame receive karna
         socket.on('stream-frame', (frameData) => {
             receiverImage.src = frameData;
         });
