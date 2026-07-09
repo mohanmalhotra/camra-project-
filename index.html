@@ -22,13 +22,14 @@
         </button>
     </div>
 
-    <!-- Video dikhane wala dabba -->
-    <div style="border: 3px solid #2ecc71; display: inline-block; border-radius: 10px; overflow: hidden; background: #000;">
-        <video id="myVideo" autoplay playsinline width="400" height="300"></video>
+   <!-- Video/Image dikhane wala dabba -->
+    <div style="border: 3px solid #2ecc71; display: inline-block; border-radius: 10px; overflow: hidden; background: #000; width: 400px; height: 300px;">
+        <!-- Phone ke liye video tag (jo frames capture karega) -->
+        <video id="myVideo" autoplay playsinline width="400" height="300" style="display: none;"></video>
+        
+        <!-- Laptop ke liye image tag (jo live stream dikhayega) -->
+        <img id="receiverImg" width="400" height="300" style="object-fit: cover; background: #000;" />
     </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js"></script>
 </body></script>
 </body>
 </html>

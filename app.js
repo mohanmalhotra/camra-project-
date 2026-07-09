@@ -1,26 +1,29 @@
 const socket = io("https://camra-project.onrender.com");
 const videoElement = document.getElementById('myVideo');
+const receiverImage = document.getElementById('receiverImg'); // Naya image tag select kiya
 
 // --- 📲 PHONE WALA KAAM (SENDER) ---
 document.getElementById('startCamBtn').addEventListener('click', async () => {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); // Back camera automatic khulega
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); 
         videoElement.srcObject = stream;
+        videoElement.style.display = "block"; // Phone par camera view dikhane ke liye
         
-        // Canvas banakar frames nikalna
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = 400;
         canvas.height = 300;
 
-        // Har 100ms me frame server par bhejna
+        // Har 100ms me frame nikal kar server ko bhejenge
         setInterval(() => {
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            const frameData = canvas.toDataURL('image/jpeg', 0.5); // 0.5 quality taaki network slow na ho
-            socket.emit('video-frame', frameData);
+            if (videoElement.srcObject) {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const frameData = canvas.toDataURL('image/jpeg', 0.4); // Quality 0.4 taaki lag na ho
+                socket.emit('video-frame', frameData);
+            }
         }, 100);
 
-        alert("Phone camera shuru ho gaya hai aur frames bhej raha hai!");
+        alert("Phone camera shuru ho gaya hai!");
     } catch (err) {
         alert("Camera access nahi mila: " + err);
     }
@@ -28,12 +31,10 @@ document.getElementById('startCamBtn').addEventListener('click', async () => {
 
 // --- 💻 LAPTOP WALA KAAM (RECEIVER) ---
 document.getElementById('startWatchBtn').addEventListener('click', () => {
-    alert("Laptop receiver mode active! Ab phone se aane wali stream yahan dikhegi.");
+    alert("Laptop receiver mode active! Ab phone ki stream yahan dikhegi.");
 });
 
-// Jab bhi server se koi naya frame aaye, use video ke upar image ki tarah chipka do
+// Jab server se frame aaye, toh laptop par use IMG tag me set karo
 socket.on('stream-frame', (frameData) => {
-    // Purane srcObject ko hata kar direct frame data base64 show karenge
-    videoElement.srcObject = null; 
-    videoElement.src = frameData;
+    receiverImage.src = frameData; // Yeh line ab bina kisi error ke live photo badlegi
 });
