@@ -1,5 +1,5 @@
 // Server se connect karne ke liye socket initialize karein
-const socket = io();
+const socket = io("https://camra-project.onrender.com");
 
 async function openCamera() {
     try {
