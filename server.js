@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io setup with CORS permissions
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -14,16 +13,14 @@ const io = new Server(server, {
     }
 });
 
-// Static files load karne ke liye (HTML, JS, CSS)
-app.use(express.static(path.join(__dirname, 'public')));
+// 📁 AB KOI PUBLIC FOLDER NAHI CHAHIYE!
+// Yeh line files ko direct main root folder se load karegi
+app.use(express.static(__dirname)); 
 
-// Jab koi client connect ho
 io.on('connection', (socket) => {
     console.log('User connected: ' + socket.id);
 
-    // 📲 Phone se aane wale frames ko catch karna
     socket.on('video-frame', (frameData) => {
-        // 💻 Yeh frames baaki sabhi devices (Laptop) ko bhej dena
         socket.broadcast.emit('stream-frame', frameData);
     });
 
@@ -32,8 +29,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Port configuration for Render
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server running smoothly on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
