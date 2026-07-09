@@ -13,19 +13,23 @@ const io = new Server(server, {
     }
 });
 
-// 📁 AB KOI PUBLIC FOLDER NAHI CHAHIYE!
-// Yeh line files ko direct main root folder se load karegi
-app.use(express.static(__dirname)); 
+// Root route standard HTML send karne ke liye
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Static files support
+app.use(express.static(__dirname));
 
 io.on('connection', (socket) => {
-    console.log('User connected: ' + socket.id);
+    console.log('User connected:', socket.id);
 
     socket.on('video-frame', (frameData) => {
         socket.broadcast.emit('stream-frame', frameData);
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected: ' + socket.id);
+        console.log('User disconnected:', socket.id);
     });
 });
 
