@@ -3,97 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Streaming System</title>
+    <title>Secure Camera Streaming</title>
 </head>
 <body style="background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px;">
 
-    <h2>🚀 Super CCTV Camera System (Strict Front Cam)</h2>
-    
-    <div style="margin-bottom: 20px;">
-        <button id="startCamBtn" style="padding: 12px 24px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">
-            📸 Phone (Start Front Camera)
-        </button>
-        <button id="startWatchBtn" style="padding: 12px 24px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-            💻 Laptop (Watch Screen)
-        </button>
+    <div id="loginScreen" style="margin-top: 100px;">
+        <h2>🔒 Enter Security PIN</h2>
+        <p style="color: #aaa;">Is system ko use karne ke liye PIN daalein</p>
+        <input type="password" id="pinInput" placeholder="Enter PIN" style="padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #444; background: #222; color: white; text-align: center;">
+        <br><br>
+        <button id="loginBtn" style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Unlock System</button>
     </div>
 
-    <div style="border: 4px solid #2ecc71; display: inline-block; border-radius: 10px; overflow: hidden; background: #000; width: 400px; height: 300px; box-shadow: 0 0 15px rgba(46,204,113,0.4);">
-        <video id="myVideo" autoplay playsinline width="400" height="300" style="display: none;"></video>
+    <div id="mainApp" style="display: none;">
+        <h2>🚀 Secure CCTV Camera System (Front Cam)</h2>
         
-        <img id="receiverImg" width="400" height="300" style="object-fit: cover; background: #000;" src="https://via.placeholder.com/400x300/000000/FFFFFF?text=Waiting+for+Stream..." />
+        <div style="margin-bottom: 20px;">
+            <button id="startCamBtn" style="padding: 12px 24px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">
+                📸 Phone (Start Camera)
+            </button>
+            <button id="startWatchBtn" style="padding: 12px 24px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                💻 Laptop (Watch Screen)
+            </button>
+        </div>
+
+        <div style="border: 4px solid #2ecc71; display: inline-block; border-radius: 10px; overflow: hidden; background: #000; width: 400px; height: 300px; box-shadow: 0 0 15px rgba(46,204,113,0.4);">
+            <video id="myVideo" autoplay playsinline width="400" height="300" style="display: none;"></video>
+            <img id="receiverImg" width="400" height="300" style="object-fit: cover; background: #000;" src="https://via.placeholder.com/400x300/000000/FFFFFF?text=Waiting+for+Stream..." />
+        </div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     
     <script>
-        const socket = io("https://camra-project.onrender.com");
-        
-        const videoElement = document.getElementById('myVideo');
-        const receiverImage = document.getElementById('receiverImg');
+        const CORRECT_PIN = "1234"; // 👈 Yahan aap apna manpasand password badal sakte hain!
 
-        socket.on('connect', () => {
-            console.log("Connected to Server!");
-        });
-
-        // 📲 PHONE WALA CODE (Strict Front Cam Force)
-        document.getElementById('startCamBtn').addEventListener('click', async () => {
-            alert("Front camera force start ho raha hai...");
-            try {
-                // Is baar browser ko forced bol rahe hain ki strictly Front Cam hi chahiye
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: { exact: "user" } 
-                    }, 
-                    audio: false 
-                }); 
-                
-                videoElement.srcObject = stream;
-                videoElement.style.display = "block";
-                receiverImage.style.display = "none";
-                
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = 400;
-                canvas.height = 300;
-
-                setInterval(() => {
-                    if (videoElement.srcObject) {
-                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                        const frameData = canvas.toDataURL('image/jpeg', 0.4);
-                        socket.emit('video-frame', frameData);
-                    }
-                }, 100);
-
-                alert("🟢 Front Camera successfully locked and live!");
-            } catch (err) {
-                console.log("Strict mode failed, trying fallback front mode...", err);
-                // Agar kuch phones me 'exact' mana kare, toh normal front cam handle karega
-                try {
-                    const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: "user" }, 
-                        audio: false 
-                    });
-                    videoElement.srcObject = fallbackStream;
-                    videoElement.style.display = "block";
-                    receiverImage.style.display = "none";
-                    alert("🟢 Front Camera Live (Fallback Mode)!");
-                } catch(fallbackErr) {
-                    alert("🔴 Camera Error: " + fallbackErr.message);
-                }
+        // Password Logic
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const input = document.getElementById('pinInput').value;
+            if(input === CORRECT_PIN) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                initSocket(); // Password sahi hone par hi socket connect hoga
+            } else {
+                alert("❌ Wrong PIN! Access Denied.");
             }
         });
 
-        // 💻 LAPTOP WALA CODE
-        document.getElementById('startWatchBtn').addEventListener('click', () => {
-            alert("🔵 Laptop Mode Active!");
-            videoElement.style.display = "none";
-            receiverImage.style.display = "block";
-        });
+        let socket;
+        function initSocket() {
+            socket = io("https://camra-project.onrender.com");
+            
+            const videoElement = document.getElementById('myVideo');
+            const receiverImage = document.getElementById('receiverImg');
 
-        socket.on('stream-frame', (frameData) => {
-            receiverImage.src = frameData;
-        });
+            // 📲 PHONE CODE
+            document.getElementById('startCamBtn').addEventListener('click', async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "user" }, 
+                        audio: false 
+                    }); 
+                    videoElement.srcObject = stream;
+                    videoElement.style.display = "block";
+                    receiverImage.style.display = "none";
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = 400;
+                    canvas.height = 300;
+
+                    // Nakhre fix karne ke liye error handling lagayi hai
+                    setInterval(() => {
+                        if (videoElement.srcObject && socket.connected) {
+                            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                            const frameData = canvas.toDataURL('image/jpeg', 0.4);
+                            socket.emit('video-frame', frameData);
+                        }
+                    }, 100);
+
+                    alert("🟢 Phone Front Camera Live!");
+                } catch (err) {
+                    alert("🔴 Camera Error: " + err.message);
+                }
+            });
+
+            // 💻 LAPTOP CODE
+            document.getElementById('startWatchBtn').addEventListener('click', () => {
+                videoElement.style.display = "none";
+                receiverImage.style.display = "block";
+                alert("🔵 Laptop Mode Active!");
+            });
+
+            socket.on('stream-frame', (frameData) => {
+                receiverImage.src = frameData;
+            });
+        }
     </script>
 </body>
 </html>
